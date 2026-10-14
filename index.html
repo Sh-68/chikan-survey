@@ -178,48 +178,33 @@
       color: var(--text-main);
     }
 
-    /* 年齡滑動拉桿 (Slider) */
-    .slider-container {
+    /* 年齡數字輸入框樣式 */
+    .age-input-container {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 10px 0;
+      gap: 10px;
+      max-width: 260px;
     }
-    .age-slider {
-      flex: 1;
-      height: 8px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: var(--c-mist-gray);
-      border-radius: 999px;
-      outline: none;
-      cursor: pointer;
-    }
-    .age-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: var(--primary);
-      border: 2px solid #FFFFFF;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
-    .age-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.15);
-    }
-    .age-value-badge {
-      min-width: 65px;
-      text-align: center;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--primary);
-      padding: 6px 12px;
-      border-radius: 8px;
+    .age-number-input {
+      width: 100%;
+      padding: 10px 14px;
       border: 1.5px solid var(--border-color);
-      background: var(--primary-light);
+      border-radius: 8px;
+      font-size: 15px;
+      box-sizing: border-box;
+      outline: none;
+      transition: border 0.2s;
+      background: #FFFFFF;
+      color: var(--text-main);
+    }
+    .age-number-input:focus {
+      border-color: var(--primary);
+    }
+    .age-unit-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
     }
 
     /* 勾選與單選外框 */
@@ -392,11 +377,12 @@
       </div>
     </div>
 
+    <!-- 年齡：改為數字輸入框 -->
     <div class="form-group">
-      <label class="question-title">2. 年齡（請滑動選擇歲數）<span class="required-tag">*</span></label>
-      <div class="slider-container">
-        <input type="range" id="ageSlider" class="age-slider" min="0" max="100" value="25" oninput="updateAgeDisplay(this.value); syncIntroData();">
-        <div class="age-value-badge" id="ageBadge">25 歲</div>
+      <label class="question-title">2. 年齡（請輸入實歲數字）<span class="required-tag">*</span></label>
+      <div class="age-input-container">
+        <input type="number" id="ageInput" class="age-number-input" min="0" max="120" placeholder="請輸入年齡 (例如: 25)" oninput="syncIntroData()">
+        <span class="age-unit-label">歲</span>
       </div>
     </div>
 
@@ -498,9 +484,9 @@
   let currentStep = 'intro'; // 'intro', 'district', 'summary', 'finish'
   
   let surveyData = {
-    basic: { gender: '', age: 25, role: '', wantSummary: '無意願', email: '' },
+    basic: { gender: '', age: '', role: '', wantSummary: '無意願', email: '' },
     selectedDistricts: [],
-    districtResponses: {} // 暫存各街區答案：{ "米街": { timing: "平日", env_1: "5", ... } }
+    districtResponses: {} // 暫存各街區答案
   };
 
   // 8題環境感知量表題目
@@ -552,8 +538,8 @@
     const roleEl = document.querySelector('input[name="role"]:checked');
     surveyData.basic.role = roleEl ? roleEl.value : '';
 
-    const ageSlider = document.getElementById('ageSlider');
-    if (ageSlider) surveyData.basic.age = ageSlider.value;
+    const ageInput = document.getElementById('ageInput');
+    if (ageInput) surveyData.basic.age = ageInput.value.trim();
 
     const checkedBoxes = document.querySelectorAll('input[name="visited_district"]:checked');
     surveyData.selectedDistricts = Array.from(checkedBoxes).map(cb => cb.value);
@@ -573,7 +559,7 @@
     persist();
   }
 
-  // ★ 核心：針對街區即時儲存某個特定欄位
+  // 針對街區即時儲存某個特定欄位
   function recordDistrictAnswer(districtName, field, value) {
     if (!surveyData.districtResponses[districtName]) {
       surveyData.districtResponses[districtName] = { name: districtName };
@@ -582,7 +568,7 @@
     persist();
   }
 
-  // 整體暫存當前街區頁面（保險起見再次全部檢查一次）
+  // 整體暫存當前街區頁面
   function saveCurrentDistrictInputs(index) {
     const districtName = selectedDistricts[index];
     if (!districtName) return;
@@ -631,9 +617,9 @@
             const r = document.querySelector(`input[name="role"][value="${surveyData.basic.role}"]`);
             if (r) r.checked = true;
           }
-          if (surveyData.basic.age) {
-            document.getElementById('ageSlider').value = surveyData.basic.age;
-            updateAgeDisplay(surveyData.basic.age);
+          if (surveyData.basic.age !== undefined && surveyData.basic.age !== '') {
+            const ageInput = document.getElementById('ageInput');
+            if (ageInput) ageInput.value = surveyData.basic.age;
           }
           if (selectedDistricts.length > 0) {
             selectedDistricts.forEach(d => {
@@ -668,16 +654,16 @@
     }
   });
 
-  function updateAgeDisplay(val) {
-    document.getElementById('ageBadge').textContent = `${val} 歲`;
-    surveyData.basic.age = val;
-  }
-
   function startDistrictQuestions() {
     syncIntroData();
 
     if (!surveyData.basic.gender) {
       alert("請選擇您的性別。");
+      return;
+    }
+    if (!surveyData.basic.age || isNaN(surveyData.basic.age) || Number(surveyData.basic.age) < 0) {
+      alert("請輸入有效的年齡數字！");
+      document.getElementById('ageInput').focus();
       return;
     }
     if (selectedDistricts.length === 0) {
@@ -751,7 +737,7 @@
       <h2>二、環境感知量表</h2>
     `;
 
-    // 渲染環境感知題目（即時綁定 recordDistrictAnswer）
+    // 渲染環境感知題目
     envQuestions.forEach((q, i) => {
       const fieldKey = `env_${i+1}`;
       const savedVal = saved[fieldKey] || '';
@@ -776,7 +762,7 @@
 
     html += `<h2>三、知覺恢復性量表</h2>`;
 
-    // 渲染知覺恢復性題目（即時綁定 recordDistrictAnswer）
+    // 渲染知覺恢復性題目
     prQuestions.forEach((q, i) => {
       const fieldKey = `pr_${i+1}`;
       const savedVal = saved[fieldKey] || '';
