@@ -402,7 +402,7 @@
 
     <!-- 研究範圍圖保留空間 -->
     <div class="form-group">
-      <label class="question-title">3. 請勾選您過去三個月內曾實際造訪過的街區（可複選）：<span class="required-tag">*</span></label>
+      <label class="question-title">3. 請勾選您過去一年內曾實際造訪過的街區（可複選）：<span class="required-tag">*</span></label>
       
       <div class="map-display-card">
         <img id="studyAreaMap" src="https://lh3.googleusercontent.com/d/1kz7AuZ90kr21mWj8iKqiZxNW8HY2eT3T" alt="研究範圍地圖">
@@ -681,7 +681,7 @@
       return;
     }
     if (selectedDistricts.length === 0) {
-      alert("請至少勾選一個過去三個月內造訪過的街區！");
+      alert("請至少勾選一個過去一年內造訪過的街區！");
       return;
     }
     if (!surveyData.basic.role) {
