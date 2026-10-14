@@ -121,7 +121,7 @@
       border-top: 1px solid #EFEFEF;
     }
 
-    /* 第一頁研究範圍圖專用樣式（整張縮小完整看、左右留白） */
+    /* 第一頁研究範圍圖專用樣式 */
     .map-display-card {
       margin: 16px 0 16px 0;
       border-radius: 12px;
@@ -386,16 +386,16 @@
     <div class="form-group">
       <label class="question-title">1. 性別<span class="required-tag">*</span></label>
       <div class="timing-group">
-        <label><input type="radio" name="gender" value="男" onchange="autoSave()"><span>男</span></label>
-        <label><input type="radio" name="gender" value="女" onchange="autoSave()"><span>女</span></label>
-        <label><input type="radio" name="gender" value="其他" onchange="autoSave()"><span>其他 / 不便透露</span></label>
+        <label><input type="radio" name="gender" value="男" onchange="syncIntroData()"><span>男</span></label>
+        <label><input type="radio" name="gender" value="女" onchange="syncIntroData()"><span>女</span></label>
+        <label><input type="radio" name="gender" value="其他" onchange="syncIntroData()"><span>其他 / 不便透露</span></label>
       </div>
     </div>
 
     <div class="form-group">
       <label class="question-title">2. 年齡（請滑動選擇歲數）<span class="required-tag">*</span></label>
       <div class="slider-container">
-        <input type="range" id="ageSlider" class="age-slider" min="0" max="100" value="25" oninput="updateAgeDisplay(this.value); autoSave();">
+        <input type="range" id="ageSlider" class="age-slider" min="0" max="100" value="25" oninput="updateAgeDisplay(this.value); syncIntroData();">
         <div class="age-value-badge" id="ageBadge">25 歲</div>
       </div>
     </div>
@@ -410,10 +410,10 @@
       </div>
 
       <div class="checkbox-tag-group">
-        <label><input type="checkbox" name="visited_district" value="米街" onchange="autoSave()"><span>米街</span></label>
-        <label><input type="checkbox" name="visited_district" value="抽籤巷" onchange="autoSave()"><span>抽籤巷</span></label>
-        <label><input type="checkbox" name="visited_district" value="小上帝廟" onchange="autoSave()"><span>小上帝廟</span></label>
-        <label><input type="checkbox" name="visited_district" value="萬福庵" onchange="autoSave()"><span>萬福庵</span></label>
+        <label><input type="checkbox" name="visited_district" value="米街" onchange="syncIntroData()"><span>米街</span></label>
+        <label><input type="checkbox" name="visited_district" value="抽籤巷" onchange="syncIntroData()"><span>抽籤巷</span></label>
+        <label><input type="checkbox" name="visited_district" value="小上帝廟" onchange="syncIntroData()"><span>小上帝廟</span></label>
+        <label><input type="checkbox" name="visited_district" value="萬福庵" onchange="syncIntroData()"><span>萬福庵</span></label>
       </div>
     </div>
 
@@ -421,9 +421,9 @@
     <div class="form-group">
       <label class="question-title">4. 請問您到訪的身分為何？<span class="required-tag">*</span></label>
       <div class="timing-group">
-        <label><input type="radio" name="role" value="居民" onchange="autoSave()"><span>居民</span></label>
-        <label><input type="radio" name="role" value="訪客" onchange="autoSave()"><span>訪客</span></label>
-        <label><input type="radio" name="role" value="商家" onchange="autoSave()"><span>商家</span></label>
+        <label><input type="radio" name="role" value="居民" onchange="syncIntroData()"><span>居民</span></label>
+        <label><input type="radio" name="role" value="訪客" onchange="syncIntroData()"><span>訪客</span></label>
+        <label><input type="radio" name="role" value="商家" onchange="syncIntroData()"><span>商家</span></label>
       </div>
     </div>
 
@@ -444,14 +444,14 @@
     <div class="form-group">
       <label class="question-title">請問您是否有意願收到本研究的成果摘要？</label>
       <div class="timing-group">
-        <label><input type="radio" name="wantSummary" value="有意願" onchange="toggleEmailField(true); autoSave();"><span>有意願</span></label>
-        <label><input type="radio" name="wantSummary" value="無意願" checked onchange="toggleEmailField(false); autoSave();"><span>暫不需要</span></label>
+        <label><input type="radio" name="wantSummary" value="有意願" onchange="toggleEmailField(true); syncSummaryData();"><span>有意願</span></label>
+        <label><input type="radio" name="wantSummary" value="無意願" checked onchange="toggleEmailField(false); syncSummaryData();"><span>暫不需要</span></label>
       </div>
     </div>
 
     <div class="form-group" id="emailInputGroup" style="display:none;">
       <label class="question-title">您的電子郵件地址 (Email)：</label>
-      <input type="email" id="userEmail" placeholder="example@email.com" oninput="autoSave()">
+      <input type="email" id="userEmail" placeholder="example@email.com" oninput="syncSummaryData()">
       <small style="color:var(--text-sub); display:block; margin-top:4px;">* 電子郵件僅用於寄發研究成果摘要，絕不外流或挪作其他商業用途。</small>
     </div>
 
@@ -475,7 +475,7 @@
 
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyp_pA6YPRzJ2PR1MCyWePgeUry2HOONLXgyuyDBIugE52LPZkhJa_1soWtu-QcnOQduQ/exec";
-  const STORAGE_KEY = "survey_draft_state_chikan_v1";
+  const STORAGE_KEY = "survey_draft_state_chikan_v2";
 
   // ★ 街區實景圖連結
   const DISTRICT_PHOTOS = {
@@ -500,7 +500,7 @@
   let surveyData = {
     basic: { gender: '', age: 25, role: '', wantSummary: '無意願', email: '' },
     selectedDistricts: [],
-    districtResponses: {} // 暫存各街區答案
+    districtResponses: {} // 暫存各街區答案：{ "米街": { timing: "平日", env_1: "5", ... } }
   };
 
   // 8題環境感知量表題目
@@ -519,7 +519,7 @@
   const prQuestions = [
     "這個地方令人著迷",
     "在這個地方，我的注意力會被許多有趣的事物所吸引",
-    "在這個地方，很難感到重聊",
+    "在這個地方，很難感到無聊",
     "這個地方是躲避煩擾的避風港",
     "這個地方可以讓我遠離平時消耗我注意力的事物",
     "這個地方可以讓我不再去想那些我必須完成的事",
@@ -530,14 +530,27 @@
     "在這個地方，幾乎沒有邊界會限制我移動的可能性"
   ];
 
-  // 自動持久化儲存到 localStorage
-  function autoSave() {
-    // 若在第一頁，抓取第一頁的值
+  // 持久化寫入 localStorage
+  function persist() {
+    try {
+      const bundle = {
+        surveyData: surveyData,
+        currentStep: currentStep,
+        currentDistrictIndex: currentDistrictIndex
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(bundle));
+    } catch (e) {
+      console.warn("localStorage 儲存失敗", e);
+    }
+  }
+
+  // 同步第一頁基本資料
+  function syncIntroData() {
     const genderEl = document.querySelector('input[name="gender"]:checked');
-    if (genderEl) surveyData.basic.gender = genderEl.value;
+    surveyData.basic.gender = genderEl ? genderEl.value : '';
 
     const roleEl = document.querySelector('input[name="role"]:checked');
-    if (roleEl) surveyData.basic.role = roleEl.value;
+    surveyData.basic.role = roleEl ? roleEl.value : '';
 
     const ageSlider = document.getElementById('ageSlider');
     if (ageSlider) surveyData.basic.age = ageSlider.value;
@@ -546,31 +559,58 @@
     surveyData.selectedDistricts = Array.from(checkedBoxes).map(cb => cb.value);
     selectedDistricts = surveyData.selectedDistricts;
 
-    // 若在街區頁，抓取當前街區的值
-    if (currentStep === 'district' && selectedDistricts[currentDistrictIndex]) {
-      saveCurrentInputs(currentDistrictIndex);
-    }
+    persist();
+  }
 
-    // 若在最後一頁，抓取信箱與意願
+  // 同步最後一頁摘要與信箱
+  function syncSummaryData() {
     const wantSummaryEl = document.querySelector('input[name="wantSummary"]:checked');
     if (wantSummaryEl) surveyData.basic.wantSummary = wantSummaryEl.value;
 
     const emailEl = document.getElementById('userEmail');
-    if (emailEl) surveyData.basic.email = emailEl.value;
+    if (emailEl) surveyData.basic.email = emailEl.value.trim();
 
-    const bundle = {
-      surveyData: surveyData,
-      currentStep: currentStep,
-      currentDistrictIndex: currentDistrictIndex
-    };
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(bundle));
-    } catch (e) {
-      console.warn("無法寫入 localStorage", e);
-    }
+    persist();
   }
 
-  // 頁面載入時自動還原草稿
+  // ★ 核心：針對街區即時儲存某個特定欄位
+  function recordDistrictAnswer(districtName, field, value) {
+    if (!surveyData.districtResponses[districtName]) {
+      surveyData.districtResponses[districtName] = { name: districtName };
+    }
+    surveyData.districtResponses[districtName][field] = value;
+    persist();
+  }
+
+  // 整體暫存當前街區頁面（保險起見再次全部檢查一次）
+  function saveCurrentDistrictInputs(index) {
+    const districtName = selectedDistricts[index];
+    if (!districtName) return;
+
+    if (!surveyData.districtResponses[districtName]) {
+      surveyData.districtResponses[districtName] = { name: districtName };
+    }
+
+    const timing = document.querySelector(`input[name="timing_${index}"]:checked`);
+    if (timing) surveyData.districtResponses[districtName].timing = timing.value;
+
+    for (let i = 1; i <= envQuestions.length; i++) {
+      const val = document.querySelector(`input[name="env_${index}_${i}"]:checked`);
+      if (val) surveyData.districtResponses[districtName][`env_${i}`] = val.value;
+    }
+
+    for (let i = 1; i <= prQuestions.length; i++) {
+      const val = document.querySelector(`input[name="pr_${index}_${i}"]:checked`);
+      if (val) surveyData.districtResponses[districtName][`pr_${i}`] = val.value;
+    }
+
+    const feedback = document.getElementById(`openFeedback_${index}`);
+    if (feedback) surveyData.districtResponses[districtName].openFeedback = feedback.value;
+
+    persist();
+  }
+
+  // 頁面重整或從地圖返回時自動恢復
   window.addEventListener('DOMContentLoaded', () => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -582,7 +622,7 @@
           currentStep = bundle.currentStep || 'intro';
           currentDistrictIndex = bundle.currentDistrictIndex || 0;
 
-          // 還原第一頁表單欄位
+          // 還原第一頁
           if (surveyData.basic.gender) {
             const g = document.querySelector(`input[name="gender"][value="${surveyData.basic.gender}"]`);
             if (g) g.checked = true;
@@ -595,14 +635,14 @@
             document.getElementById('ageSlider').value = surveyData.basic.age;
             updateAgeDisplay(surveyData.basic.age);
           }
-          if (selectedDistricts && selectedDistricts.length > 0) {
+          if (selectedDistricts.length > 0) {
             selectedDistricts.forEach(d => {
               const cb = document.querySelector(`input[name="visited_district"][value="${d}"]`);
               if (cb) cb.checked = true;
             });
           }
 
-          // 還原摘要頁欄位
+          // 還原摘要頁
           if (surveyData.basic.wantSummary) {
             const ws = document.querySelector(`input[name="wantSummary"][value="${surveyData.basic.wantSummary}"]`);
             if (ws) {
@@ -614,7 +654,7 @@
             document.getElementById('userEmail').value = surveyData.basic.email;
           }
 
-          // 判斷直接還原到離開時的步驟
+          // 直接還原至該步驟
           if (currentStep === 'district' && selectedDistricts.length > 0) {
             if (currentDistrictIndex >= selectedDistricts.length) currentDistrictIndex = 0;
             renderDistrictPage(currentDistrictIndex);
@@ -624,7 +664,7 @@
         }
       }
     } catch (e) {
-      console.warn("還原暫存失敗", e);
+      console.warn("還原資料失敗", e);
     }
   });
 
@@ -634,77 +674,40 @@
   }
 
   function startDistrictQuestions() {
-    const gender = document.querySelector('input[name="gender"]:checked');
-    const role = document.querySelector('input[name="role"]:checked');
-    const ageVal = document.getElementById('ageSlider').value;
-    const checkedBoxes = document.querySelectorAll('input[name="visited_district"]:checked');
+    syncIntroData();
 
-    if (!gender) {
+    if (!surveyData.basic.gender) {
       alert("請選擇您的性別。");
       return;
     }
-
-    selectedDistricts = Array.from(checkedBoxes).map(cb => cb.value);
     if (selectedDistricts.length === 0) {
       alert("請至少勾選一個過去三個月內造訪過的街區！");
       return;
     }
-
-    if (!role) {
+    if (!surveyData.basic.role) {
       alert("請選擇您到訪的身分（居民、訪客或商家）。");
       return;
     }
 
-    surveyData.basic.gender = gender.value;
-    surveyData.basic.age = ageVal;
-    surveyData.basic.role = role.value;
-    surveyData.selectedDistricts = selectedDistricts;
     currentDistrictIndex = 0;
     currentStep = 'district';
-    autoSave();
-
+    persist();
     renderDistrictPage(currentDistrictIndex);
-  }
-
-  // 暫存當前頁面的填寫資料
-  function saveCurrentInputs(index) {
-    const districtName = selectedDistricts[index];
-    if (!districtName) return;
-
-    const timing = document.querySelector(`input[name="timing_${index}"]:checked`);
-    
-    let resp = surveyData.districtResponses[districtName] || { name: districtName };
-    resp.timing = timing ? timing.value : '';
-
-    // 存環境感知
-    for (let i = 1; i <= envQuestions.length; i++) {
-      const val = document.querySelector(`input[name="env_${index}_${i}"]:checked`);
-      resp[`env_${i}`] = val ? val.value : '';
-    }
-
-    // 存知覺恢復性
-    for (let i = 1; i <= prQuestions.length; i++) {
-      const val = document.querySelector(`input[name="pr_${index}_${i}"]:checked`);
-      resp[`pr_${i}`] = val ? val.value : '';
-    }
-
-    const openFeedback = document.getElementById(`openFeedback_${index}`);
-    if (openFeedback) {
-      resp.openFeedback = openFeedback.value;
-    }
-
-    surveyData.districtResponses[districtName] = resp;
   }
 
   function renderDistrictPage(index) {
     currentStep = 'district';
     currentDistrictIndex = index;
+    persist();
+
     const districtName = selectedDistricts[index];
     const total = selectedDistricts.length;
     const container = document.getElementById('district-container');
     const photoUrl = DISTRICT_PHOTOS[districtName] || "";
     const mapLink = DISTRICT_MAP_LINKS[districtName] || "https://maps.google.com";
     const progressPercent = Math.round(((index + 1) / total) * 100);
+    
+    // 取出此街區先前的已存答案
     const saved = surveyData.districtResponses[districtName] || {};
 
     document.getElementById('intro-step').classList.remove('active');
@@ -729,9 +732,9 @@
         </div>
       ` : ''}
 
-      <!-- 照片下方：Google 地圖超連結按鈕（點擊前自動存檔） -->
+      <!-- 照片下方：Google 地圖超連結按鈕 -->
       <div class="streetview-link-wrapper">
-        <a href="${mapLink}" target="_blank" rel="noopener noreferrer" class="streetview-btn" onclick="autoSave()">
+        <a href="${mapLink}" target="_blank" rel="noopener noreferrer" class="streetview-btn" onclick="saveCurrentDistrictInputs(${index})">
           📍 點此在 Google 地圖中查看「${districtName}街區」周邊
         </a>
       </div>
@@ -740,26 +743,27 @@
       <div class="form-group">
         <label class="question-title">本次填答所聯想到的，是您在「${districtName} 街區」於什麼時間點的經驗？<span class="required-tag">*</span></label>
         <div class="timing-group">
-          <label><input type="radio" name="timing_${index}" value="平日" ${saved.timing === '平日' ? 'checked' : ''} onchange="autoSave()"><span>平日</span></label>
-          <label><input type="radio" name="timing_${index}" value="假日" ${saved.timing === '假日' ? 'checked' : ''} onchange="autoSave()"><span>假日</span></label>
+          <label><input type="radio" name="timing_${index}" value="平日" ${saved.timing === '平日' ? 'checked' : ''} onchange="recordDistrictAnswer('${districtName}', 'timing', '平日')"><span>平日</span></label>
+          <label><input type="radio" name="timing_${index}" value="假日" ${saved.timing === '假日' ? 'checked' : ''} onchange="recordDistrictAnswer('${districtName}', 'timing', '假日')"><span>假日</span></label>
         </div>
       </div>
 
       <h2>二、環境感知量表</h2>
     `;
 
-    // 渲染環境感知題目
+    // 渲染環境感知題目（即時綁定 recordDistrictAnswer）
     envQuestions.forEach((q, i) => {
-      const savedVal = saved[`env_${i+1}`] || '';
+      const fieldKey = `env_${i+1}`;
+      const savedVal = saved[fieldKey] || '';
       html += `
         <div class="form-group">
           <label class="question-title">${i + 1}. ${q}<span class="required-tag">*</span></label>
           <div class="likert-scale">
-            <label>1<input type="radio" name="env_${index}_${i+1}" value="1" ${savedVal === '1' ? 'checked' : ''} onchange="autoSave()"></label>
-            <label>2<input type="radio" name="env_${index}_${i+1}" value="2" ${savedVal === '2' ? 'checked' : ''} onchange="autoSave()"></label>
-            <label>3<input type="radio" name="env_${index}_${i+1}" value="3" ${savedVal === '3' ? 'checked' : ''} onchange="autoSave()"></label>
-            <label>4<input type="radio" name="env_${index}_${i+1}" value="4" ${savedVal === '4' ? 'checked' : ''} onchange="autoSave()"></label>
-            <label>5<input type="radio" name="env_${index}_${i+1}" value="5" ${savedVal === '5' ? 'checked' : ''} onchange="autoSave()"></label>
+            <label>1<input type="radio" name="env_${index}_${i+1}" value="1" ${savedVal === '1' ? 'checked' : ''} onchange="recordDistrictAnswer('${districtName}', '${fieldKey}', '1')"></label>
+            <label>2<input type="radio" name="env_${index}_${i+1}" value="2" ${savedVal === '2' ? 'checked' : ''} onchange="recordDistrictAnswer('${districtName}', '${fieldKey}', '2')"></label>
+            <label>3<input type="radio" name="env_${index}_${i+1}" value="3" ${savedVal === '3' ? 'checked' : ''} onchange="recordDistrictAnswer('${districtName}', '${fieldKey}', '3')"></label>
+            <label>4<input type="radio" name="env_${index}_${i+1}" value="4" ${savedVal === '4' ? 'checked' : ''} onchange="recordDistrictAnswer('${districtName}', '${fieldKey}', '4')"></label>
+            <label>5<input type="radio" name="env_${index}_${i+1}" value="5" ${savedVal === '5' ? 'checked' : ''} onchange="recordDistrictAnswer('${districtName}', '${fieldKey}', '5')"></label>
           </div>
           <div class="likert-hint">
             <span>非常不同意</span>
@@ -772,18 +776,19 @@
 
     html += `<h2>三、知覺恢復性量表</h2>`;
 
-    // 渲染知覺恢復性題目
+    // 渲染知覺恢復性題目（即時綁定 recordDistrictAnswer）
     prQuestions.forEach((q, i) => {
-      const savedVal = saved[`pr_${i+1}`] || '';
+      const fieldKey = `pr_${i+1}`;
+      const savedVal = saved[fieldKey] || '';
       html += `
         <div class="form-group">
           <label class="question-title">${i + 1}. ${q}<span class="required-tag">*</span></label>
           <div class="likert-scale">
-            <label>1<input type="radio" name="pr_${index}_${i+1}" value="1" ${savedVal === '1' ? 'checked' : ''} onchange="autoSave()"></label>
-            <label>2<input type="radio" name="pr_${index}_${i+1}" value="2" ${savedVal === '2' ? 'checked' : ''} onchange="autoSave()"></label>
-            <label>3<input type="radio" name="pr_${index}_${i+1}" value="3" ${savedVal === '3' ? 'checked' : ''} onchange="autoSave()"></label>
-            <label>4<input type="radio" name="pr_${index}_${i+1}" value="4" ${savedVal === '4' ? 'checked' : ''} onchange="autoSave()"></label>
-            <label>5<input type="radio" name="pr_${index}_${i+1}" value="5" ${savedVal === '5' ? 'checked' : ''} onchange="autoSave()"></label>
+            <label>1<input type="radio" name="pr_${index}_${i+1}" value="1" ${savedVal === '1' ? 'checked' : ''} onchange="recordDistrictAnswer('${districtName}', '${fieldKey}', '1')"></label>
+            <label>2<input type="radio" name="pr_${index}_${i+1}" value="2" ${savedVal === '2' ? 'checked' : ''} onchange="recordDistrictAnswer('${districtName}', '${fieldKey}', '2')"></label>
+            <label>3<input type="radio" name="pr_${index}_${i+1}" value="3" ${savedVal === '3' ? 'checked' : ''} onchange="recordDistrictAnswer('${districtName}', '${fieldKey}', '3')"></label>
+            <label>4<input type="radio" name="pr_${index}_${i+1}" value="4" ${savedVal === '4' ? 'checked' : ''} onchange="recordDistrictAnswer('${districtName}', '${fieldKey}', '4')"></label>
+            <label>5<input type="radio" name="pr_${index}_${i+1}" value="5" ${savedVal === '5' ? 'checked' : ''} onchange="recordDistrictAnswer('${districtName}', '${fieldKey}', '5')"></label>
           </div>
           <div class="likert-hint">
             <span>非常不同意</span>
@@ -798,7 +803,7 @@
       <h2>四、開放式回饋</h2>
       <div class="form-group">
         <label class="question-title">針對「${districtName} 街區」的空間環境體驗，您是否有其他具體想法或建議？</label>
-        <textarea id="openFeedback_${index}" rows="3" placeholder="請填寫您的想法..." oninput="autoSave()">${saved.openFeedback || ''}</textarea>
+        <textarea id="openFeedback_${index}" rows="3" placeholder="請填寫您的想法..." oninput="recordDistrictAnswer('${districtName}', 'openFeedback', this.value)">${saved.openFeedback || ''}</textarea>
       </div>
 
       <div class="button-group">
@@ -815,31 +820,36 @@
 
   // 上一頁處理
   function prevStep(index) {
-    saveCurrentInputs(index);
+    saveCurrentDistrictInputs(index);
     if (index === 0) {
       currentStep = 'intro';
-      autoSave();
+      persist();
       document.getElementById('district-container').classList.remove('active');
       document.getElementById('intro-step').classList.add('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       currentDistrictIndex--;
-      autoSave();
+      persist();
       renderDistrictPage(currentDistrictIndex);
     }
   }
 
   function saveAndNext(index) {
-    const timing = document.querySelector(`input[name="timing_${index}"]:checked`);
-    if (!timing) {
-      alert("請選擇「一、到訪時間」（平日或假日）。");
-      return;
+    const districtName = selectedDistricts[index];
+    const saved = surveyData.districtResponses[districtName] || {};
+
+    // 檢查是否有選平日/假日
+    if (!saved.timing) {
+      const timingRadio = document.querySelector(`input[name="timing_${index}"]:checked`);
+      if (!timingRadio) {
+        alert("請選擇「一、到訪時間」（平日或假日）。");
+        return;
+      }
     }
 
     // 檢查 8 題環境感知
     for (let i = 1; i <= envQuestions.length; i++) {
-      const val = document.querySelector(`input[name="env_${index}_${i}"]:checked`);
-      if (!val) {
+      if (!saved[`env_${i}`]) {
         alert(`【二、環境感知量表】第 ${i} 題尚未作答，請完成後再繼續！`);
         return;
       }
@@ -847,18 +857,17 @@
 
     // 檢查 11 題知覺恢復性
     for (let i = 1; i <= prQuestions.length; i++) {
-      const val = document.querySelector(`input[name="pr_${index}_${i}"]:checked`);
-      if (!val) {
+      if (!saved[`pr_${i}`]) {
         alert(`【三、知覺恢復性量表】第 ${i} 題尚未作答，請完成後再繼續！`);
         return;
       }
     }
 
-    saveCurrentInputs(index);
+    saveCurrentDistrictInputs(index);
 
     if (index + 1 < selectedDistricts.length) {
       currentDistrictIndex++;
-      autoSave();
+      persist();
       renderDistrictPage(currentDistrictIndex);
     } else {
       showSummaryRequestPage();
@@ -867,13 +876,14 @@
 
   function showSummaryRequestPage() {
     currentStep = 'summary';
-    autoSave();
+    persist();
     document.getElementById('district-container').classList.remove('active');
     document.getElementById('summary-request-step').classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function backToLastDistrict() {
+    syncSummaryData();
     renderDistrictPage(selectedDistricts.length - 1);
   }
 
@@ -882,16 +892,13 @@
   }
 
   function submitSurvey() {
-    const wantSummaryEl = document.querySelector('input[name="wantSummary"]:checked');
-    const emailVal = document.getElementById('userEmail').value.trim();
+    syncSummaryData();
+    const emailVal = surveyData.basic.email;
 
-    if (wantSummaryEl && wantSummaryEl.value === '有意願' && !emailVal) {
+    if (surveyData.basic.wantSummary === '有意願' && !emailVal) {
       alert("您勾選了有意願收取研究成果摘要，請填寫您的電子信箱！");
       return;
     }
-
-    surveyData.basic.wantSummary = wantSummaryEl ? wantSummaryEl.value : '無意願';
-    surveyData.basic.email = emailVal;
 
     const summaryStep = document.getElementById('summary-request-step');
     summaryStep.innerHTML = `
@@ -913,7 +920,7 @@
       body: JSON.stringify(payload)
     })
     .then(() => {
-      // 送出成功後，徹底清除暫存紀錄
+      // 成功送出後，清空本機草稿
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch (e) {}
