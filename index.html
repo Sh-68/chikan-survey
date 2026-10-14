@@ -386,16 +386,16 @@
     <div class="form-group">
       <label class="question-title">1. 性別<span class="required-tag">*</span></label>
       <div class="timing-group">
-        <label><input type="radio" name="gender" value="男"><span>男</span></label>
-        <label><input type="radio" name="gender" value="女"><span>女</span></label>
-        <label><input type="radio" name="gender" value="其他"><span>其他 / 不便透露</span></label>
+        <label><input type="radio" name="gender" value="男" onchange="autoSave()"><span>男</span></label>
+        <label><input type="radio" name="gender" value="女" onchange="autoSave()"><span>女</span></label>
+        <label><input type="radio" name="gender" value="其他" onchange="autoSave()"><span>其他 / 不便透露</span></label>
       </div>
     </div>
 
     <div class="form-group">
       <label class="question-title">2. 年齡（請滑動選擇歲數）<span class="required-tag">*</span></label>
       <div class="slider-container">
-        <input type="range" id="ageSlider" class="age-slider" min="0" max="100" value="25" oninput="updateAgeDisplay(this.value)">
+        <input type="range" id="ageSlider" class="age-slider" min="0" max="100" value="25" oninput="updateAgeDisplay(this.value); autoSave();">
         <div class="age-value-badge" id="ageBadge">25 歲</div>
       </div>
     </div>
@@ -410,10 +410,10 @@
       </div>
 
       <div class="checkbox-tag-group">
-        <label><input type="checkbox" name="visited_district" value="米街"><span>米街</span></label>
-        <label><input type="checkbox" name="visited_district" value="抽籤巷"><span>抽籤巷</span></label>
-        <label><input type="checkbox" name="visited_district" value="小上帝廟"><span>小上帝廟</span></label>
-        <label><input type="checkbox" name="visited_district" value="萬福庵"><span>萬福庵</span></label>
+        <label><input type="checkbox" name="visited_district" value="米街" onchange="autoSave()"><span>米街</span></label>
+        <label><input type="checkbox" name="visited_district" value="抽籤巷" onchange="autoSave()"><span>抽籤巷</span></label>
+        <label><input type="checkbox" name="visited_district" value="小上帝廟" onchange="autoSave()"><span>小上帝廟</span></label>
+        <label><input type="checkbox" name="visited_district" value="萬福庵" onchange="autoSave()"><span>萬福庵</span></label>
       </div>
     </div>
 
@@ -421,9 +421,9 @@
     <div class="form-group">
       <label class="question-title">4. 請問您到訪的身分為何？<span class="required-tag">*</span></label>
       <div class="timing-group">
-        <label><input type="radio" name="role" value="居民"><span>居民</span></label>
-        <label><input type="radio" name="role" value="訪客"><span>訪客</span></label>
-        <label><input type="radio" name="role" value="商家"><span>商家</span></label>
+        <label><input type="radio" name="role" value="居民" onchange="autoSave()"><span>居民</span></label>
+        <label><input type="radio" name="role" value="訪客" onchange="autoSave()"><span>訪客</span></label>
+        <label><input type="radio" name="role" value="商家" onchange="autoSave()"><span>商家</span></label>
       </div>
     </div>
 
@@ -444,14 +444,14 @@
     <div class="form-group">
       <label class="question-title">請問您是否有意願收到本研究的成果摘要？</label>
       <div class="timing-group">
-        <label><input type="radio" name="wantSummary" value="有意願" onchange="toggleEmailField(true)"><span>有意願</span></label>
-        <label><input type="radio" name="wantSummary" value="無意願" checked onchange="toggleEmailField(false)"><span>暫不需要</span></label>
+        <label><input type="radio" name="wantSummary" value="有意願" onchange="toggleEmailField(true); autoSave();"><span>有意願</span></label>
+        <label><input type="radio" name="wantSummary" value="無意願" checked onchange="toggleEmailField(false); autoSave();"><span>暫不需要</span></label>
       </div>
     </div>
 
     <div class="form-group" id="emailInputGroup" style="display:none;">
       <label class="question-title">您的電子郵件地址 (Email)：</label>
-      <input type="email" id="userEmail" placeholder="example@email.com">
+      <input type="email" id="userEmail" placeholder="example@email.com" oninput="autoSave()">
       <small style="color:var(--text-sub); display:block; margin-top:4px;">* 電子郵件僅用於寄發研究成果摘要，絕不外流或挪作其他商業用途。</small>
     </div>
 
@@ -475,6 +475,7 @@
 
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyp_pA6YPRzJ2PR1MCyWePgeUry2HOONLXgyuyDBIugE52LPZkhJa_1soWtu-QcnOQduQ/exec";
+  const STORAGE_KEY = "survey_draft_state_chikan_v1";
 
   // ★ 街區實景圖連結
   const DISTRICT_PHOTOS = {
@@ -484,7 +485,7 @@
     "小上帝廟": "https://lh3.googleusercontent.com/d/1Uu3cz24JsoxkkRGI6d6_wpYmSrj-pStz"
   };
 
-  // ★ 各街區對應之 Google 地圖超連結（精確關鍵字搜尋）
+  // ★ 各街區對應之 Google 地圖超連結
   const DISTRICT_MAP_LINKS = {
     "米街": "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("新美街 米街"),
     "抽籤巷": "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("新美街 抽籤巷"),
@@ -494,6 +495,7 @@
 
   let selectedDistricts = [];
   let currentDistrictIndex = 0;
+  let currentStep = 'intro'; // 'intro', 'district', 'summary', 'finish'
   
   let surveyData = {
     basic: { gender: '', age: 25, role: '', wantSummary: '無意願', email: '' },
@@ -517,7 +519,7 @@
   const prQuestions = [
     "這個地方令人著迷",
     "在這個地方，我的注意力會被許多有趣的事物所吸引",
-    "在這個地方，很難感到無聊",
+    "在這個地方，很難感到重聊",
     "這個地方是躲避煩擾的避風港",
     "這個地方可以讓我遠離平時消耗我注意力的事物",
     "這個地方可以讓我不再去想那些我必須完成的事",
@@ -527,6 +529,104 @@
     "這個地方足夠寬廣，讓我可以在各個方向探索",
     "在這個地方，幾乎沒有邊界會限制我移動的可能性"
   ];
+
+  // 自動持久化儲存到 localStorage
+  function autoSave() {
+    // 若在第一頁，抓取第一頁的值
+    const genderEl = document.querySelector('input[name="gender"]:checked');
+    if (genderEl) surveyData.basic.gender = genderEl.value;
+
+    const roleEl = document.querySelector('input[name="role"]:checked');
+    if (roleEl) surveyData.basic.role = roleEl.value;
+
+    const ageSlider = document.getElementById('ageSlider');
+    if (ageSlider) surveyData.basic.age = ageSlider.value;
+
+    const checkedBoxes = document.querySelectorAll('input[name="visited_district"]:checked');
+    surveyData.selectedDistricts = Array.from(checkedBoxes).map(cb => cb.value);
+    selectedDistricts = surveyData.selectedDistricts;
+
+    // 若在街區頁，抓取當前街區的值
+    if (currentStep === 'district' && selectedDistricts[currentDistrictIndex]) {
+      saveCurrentInputs(currentDistrictIndex);
+    }
+
+    // 若在最後一頁，抓取信箱與意願
+    const wantSummaryEl = document.querySelector('input[name="wantSummary"]:checked');
+    if (wantSummaryEl) surveyData.basic.wantSummary = wantSummaryEl.value;
+
+    const emailEl = document.getElementById('userEmail');
+    if (emailEl) surveyData.basic.email = emailEl.value;
+
+    const bundle = {
+      surveyData: surveyData,
+      currentStep: currentStep,
+      currentDistrictIndex: currentDistrictIndex
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(bundle));
+    } catch (e) {
+      console.warn("無法寫入 localStorage", e);
+    }
+  }
+
+  // 頁面載入時自動還原草稿
+  window.addEventListener('DOMContentLoaded', () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const bundle = JSON.parse(raw);
+        if (bundle && bundle.surveyData) {
+          surveyData = bundle.surveyData;
+          selectedDistricts = surveyData.selectedDistricts || [];
+          currentStep = bundle.currentStep || 'intro';
+          currentDistrictIndex = bundle.currentDistrictIndex || 0;
+
+          // 還原第一頁表單欄位
+          if (surveyData.basic.gender) {
+            const g = document.querySelector(`input[name="gender"][value="${surveyData.basic.gender}"]`);
+            if (g) g.checked = true;
+          }
+          if (surveyData.basic.role) {
+            const r = document.querySelector(`input[name="role"][value="${surveyData.basic.role}"]`);
+            if (r) r.checked = true;
+          }
+          if (surveyData.basic.age) {
+            document.getElementById('ageSlider').value = surveyData.basic.age;
+            updateAgeDisplay(surveyData.basic.age);
+          }
+          if (selectedDistricts && selectedDistricts.length > 0) {
+            selectedDistricts.forEach(d => {
+              const cb = document.querySelector(`input[name="visited_district"][value="${d}"]`);
+              if (cb) cb.checked = true;
+            });
+          }
+
+          // 還原摘要頁欄位
+          if (surveyData.basic.wantSummary) {
+            const ws = document.querySelector(`input[name="wantSummary"][value="${surveyData.basic.wantSummary}"]`);
+            if (ws) {
+              ws.checked = true;
+              toggleEmailField(surveyData.basic.wantSummary === '有意願');
+            }
+          }
+          if (surveyData.basic.email) {
+            document.getElementById('userEmail').value = surveyData.basic.email;
+          }
+
+          // 判斷直接還原到離開時的步驟
+          if (currentStep === 'district' && selectedDistricts.length > 0) {
+            if (currentDistrictIndex >= selectedDistricts.length) currentDistrictIndex = 0;
+            renderDistrictPage(currentDistrictIndex);
+          } else if (currentStep === 'summary') {
+            showSummaryRequestPage();
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("還原暫存失敗", e);
+    }
+  });
 
   function updateAgeDisplay(val) {
     document.getElementById('ageBadge').textContent = `${val} 歲`;
@@ -560,6 +660,8 @@
     surveyData.basic.role = role.value;
     surveyData.selectedDistricts = selectedDistricts;
     currentDistrictIndex = 0;
+    currentStep = 'district';
+    autoSave();
 
     renderDistrictPage(currentDistrictIndex);
   }
@@ -567,6 +669,8 @@
   // 暫存當前頁面的填寫資料
   function saveCurrentInputs(index) {
     const districtName = selectedDistricts[index];
+    if (!districtName) return;
+
     const timing = document.querySelector(`input[name="timing_${index}"]:checked`);
     
     let resp = surveyData.districtResponses[districtName] || { name: districtName };
@@ -593,6 +697,8 @@
   }
 
   function renderDistrictPage(index) {
+    currentStep = 'district';
+    currentDistrictIndex = index;
     const districtName = selectedDistricts[index];
     const total = selectedDistricts.length;
     const container = document.getElementById('district-container');
@@ -623,9 +729,9 @@
         </div>
       ` : ''}
 
-      <!-- 照片下方：Google 地圖超連結按鈕 -->
+      <!-- 照片下方：Google 地圖超連結按鈕（點擊前自動存檔） -->
       <div class="streetview-link-wrapper">
-        <a href="${mapLink}" target="_blank" rel="noopener noreferrer" class="streetview-btn">
+        <a href="${mapLink}" target="_blank" rel="noopener noreferrer" class="streetview-btn" onclick="autoSave()">
           📍 點此在 Google 地圖中查看「${districtName}街區」周邊
         </a>
       </div>
@@ -634,8 +740,8 @@
       <div class="form-group">
         <label class="question-title">本次填答所聯想到的，是您在「${districtName} 街區」於什麼時間點的經驗？<span class="required-tag">*</span></label>
         <div class="timing-group">
-          <label><input type="radio" name="timing_${index}" value="平日" ${saved.timing === '平日' ? 'checked' : ''}><span>平日</span></label>
-          <label><input type="radio" name="timing_${index}" value="假日" ${saved.timing === '假日' ? 'checked' : ''}><span>假日</span></label>
+          <label><input type="radio" name="timing_${index}" value="平日" ${saved.timing === '平日' ? 'checked' : ''} onchange="autoSave()"><span>平日</span></label>
+          <label><input type="radio" name="timing_${index}" value="假日" ${saved.timing === '假日' ? 'checked' : ''} onchange="autoSave()"><span>假日</span></label>
         </div>
       </div>
 
@@ -649,11 +755,11 @@
         <div class="form-group">
           <label class="question-title">${i + 1}. ${q}<span class="required-tag">*</span></label>
           <div class="likert-scale">
-            <label>1<input type="radio" name="env_${index}_${i+1}" value="1" ${savedVal === '1' ? 'checked' : ''}></label>
-            <label>2<input type="radio" name="env_${index}_${i+1}" value="2" ${savedVal === '2' ? 'checked' : ''}></label>
-            <label>3<input type="radio" name="env_${index}_${i+1}" value="3" ${savedVal === '3' ? 'checked' : ''}></label>
-            <label>4<input type="radio" name="env_${index}_${i+1}" value="4" ${savedVal === '4' ? 'checked' : ''}></label>
-            <label>5<input type="radio" name="env_${index}_${i+1}" value="5" ${savedVal === '5' ? 'checked' : ''}></label>
+            <label>1<input type="radio" name="env_${index}_${i+1}" value="1" ${savedVal === '1' ? 'checked' : ''} onchange="autoSave()"></label>
+            <label>2<input type="radio" name="env_${index}_${i+1}" value="2" ${savedVal === '2' ? 'checked' : ''} onchange="autoSave()"></label>
+            <label>3<input type="radio" name="env_${index}_${i+1}" value="3" ${savedVal === '3' ? 'checked' : ''} onchange="autoSave()"></label>
+            <label>4<input type="radio" name="env_${index}_${i+1}" value="4" ${savedVal === '4' ? 'checked' : ''} onchange="autoSave()"></label>
+            <label>5<input type="radio" name="env_${index}_${i+1}" value="5" ${savedVal === '5' ? 'checked' : ''} onchange="autoSave()"></label>
           </div>
           <div class="likert-hint">
             <span>非常不同意</span>
@@ -673,11 +779,11 @@
         <div class="form-group">
           <label class="question-title">${i + 1}. ${q}<span class="required-tag">*</span></label>
           <div class="likert-scale">
-            <label>1<input type="radio" name="pr_${index}_${i+1}" value="1" ${savedVal === '1' ? 'checked' : ''}></label>
-            <label>2<input type="radio" name="pr_${index}_${i+1}" value="2" ${savedVal === '2' ? 'checked' : ''}></label>
-            <label>3<input type="radio" name="pr_${index}_${i+1}" value="3" ${savedVal === '3' ? 'checked' : ''}></label>
-            <label>4<input type="radio" name="pr_${index}_${i+1}" value="4" ${savedVal === '4' ? 'checked' : ''}></label>
-            <label>5<input type="radio" name="pr_${index}_${i+1}" value="5" ${savedVal === '5' ? 'checked' : ''}></label>
+            <label>1<input type="radio" name="pr_${index}_${i+1}" value="1" ${savedVal === '1' ? 'checked' : ''} onchange="autoSave()"></label>
+            <label>2<input type="radio" name="pr_${index}_${i+1}" value="2" ${savedVal === '2' ? 'checked' : ''} onchange="autoSave()"></label>
+            <label>3<input type="radio" name="pr_${index}_${i+1}" value="3" ${savedVal === '3' ? 'checked' : ''} onchange="autoSave()"></label>
+            <label>4<input type="radio" name="pr_${index}_${i+1}" value="4" ${savedVal === '4' ? 'checked' : ''} onchange="autoSave()"></label>
+            <label>5<input type="radio" name="pr_${index}_${i+1}" value="5" ${savedVal === '5' ? 'checked' : ''} onchange="autoSave()"></label>
           </div>
           <div class="likert-hint">
             <span>非常不同意</span>
@@ -692,7 +798,7 @@
       <h2>四、開放式回饋</h2>
       <div class="form-group">
         <label class="question-title">針對「${districtName} 街區」的空間環境體驗，您是否有其他具體想法或建議？</label>
-        <textarea id="openFeedback_${index}" rows="3" placeholder="請填寫您的想法...">${saved.openFeedback || ''}</textarea>
+        <textarea id="openFeedback_${index}" rows="3" placeholder="請填寫您的想法..." oninput="autoSave()">${saved.openFeedback || ''}</textarea>
       </div>
 
       <div class="button-group">
@@ -711,11 +817,14 @@
   function prevStep(index) {
     saveCurrentInputs(index);
     if (index === 0) {
+      currentStep = 'intro';
+      autoSave();
       document.getElementById('district-container').classList.remove('active');
       document.getElementById('intro-step').classList.add('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       currentDistrictIndex--;
+      autoSave();
       renderDistrictPage(currentDistrictIndex);
     }
   }
@@ -749,21 +858,22 @@
 
     if (index + 1 < selectedDistricts.length) {
       currentDistrictIndex++;
+      autoSave();
       renderDistrictPage(currentDistrictIndex);
     } else {
-      // 完成所有街區，前往成果摘要索取頁面
       showSummaryRequestPage();
     }
   }
 
   function showSummaryRequestPage() {
+    currentStep = 'summary';
+    autoSave();
     document.getElementById('district-container').classList.remove('active');
     document.getElementById('summary-request-step').classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function backToLastDistrict() {
-    document.getElementById('summary-request-step').classList.remove('active');
     renderDistrictPage(selectedDistricts.length - 1);
   }
 
@@ -803,12 +913,21 @@
       body: JSON.stringify(payload)
     })
     .then(() => {
+      // 送出成功後，徹底清除暫存紀錄
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
+
       summaryStep.classList.remove('active');
       document.getElementById('finish-step').classList.add('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     })
     .catch(err => {
       console.error(err);
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
+
       summaryStep.classList.remove('active');
       document.getElementById('finish-step').classList.add('active');
     });
