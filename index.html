@@ -377,7 +377,7 @@
       </div>
     </div>
 
-    <!-- 年齡：改為數字輸入框 -->
+    <!-- 年齡：數字輸入框 -->
     <div class="form-group">
       <label class="question-title">2. 年齡（請輸入實歲數字）<span class="required-tag">*</span></label>
       <div class="age-input-container">
@@ -386,9 +386,18 @@
       </div>
     </div>
 
+    <!-- 地圖前新增：居住身分題 -->
+    <div class="form-group">
+      <label class="question-title">3. 您目前是否居住於臺南市？<span class="required-tag">*</span></label>
+      <div class="timing-group">
+        <label><input type="radio" name="isTainanResident" value="是" onchange="syncIntroData()"><span>是</span></label>
+        <label><input type="radio" name="isTainanResident" value="否" onchange="syncIntroData()"><span>否</span></label>
+      </div>
+    </div>
+
     <!-- 研究範圍圖保留空間 -->
     <div class="form-group">
-      <label class="question-title">3. 請勾選您過去一年內曾實際造訪過的街區（可複選）：<span class="required-tag">*</span></label>
+      <label class="question-title">4. 請勾選您過去一年內曾實際造訪過的街區（可複選）：<span class="required-tag">*</span></label>
       
       <div class="map-display-card">
         <img id="studyAreaMap" src="https://lh3.googleusercontent.com/d/1kz7AuZ90kr21mWj8iKqiZxNW8HY2eT3T" alt="研究範圍地圖">
@@ -403,9 +412,9 @@
       </div>
     </div>
 
-    <!-- 到訪身分題目 -->
+    <!-- 到訪身分題目：文字更新 -->
     <div class="form-group">
-      <label class="question-title">4. 請問您到訪的身分為何？<span class="required-tag">*</span></label>
+      <label class="question-title">5. 請問您到訪赤崁周邊歷史街區的身分為何？<span class="required-tag">*</span></label>
       <div class="timing-group">
         <label><input type="radio" name="role" value="居民" onchange="syncIntroData()"><span>居民</span></label>
         <label><input type="radio" name="role" value="訪客" onchange="syncIntroData()"><span>訪客</span></label>
@@ -484,7 +493,7 @@
   let currentStep = 'intro'; // 'intro', 'district', 'summary', 'finish'
   
   let surveyData = {
-    basic: { gender: '', age: '', role: '', wantSummary: '無意願', email: '' },
+    basic: { gender: '', age: '', isTainanResident: '', role: '', wantSummary: '無意願', email: '' },
     selectedDistricts: [],
     districtResponses: {} // 暫存各街區答案
   };
@@ -535,15 +544,18 @@
     const genderEl = document.querySelector('input[name="gender"]:checked');
     surveyData.basic.gender = genderEl ? genderEl.value : '';
 
-    const roleEl = document.querySelector('input[name="role"]:checked');
-    surveyData.basic.role = roleEl ? roleEl.value : '';
-
     const ageInput = document.getElementById('ageInput');
     if (ageInput) surveyData.basic.age = ageInput.value.trim();
+
+    const residentEl = document.querySelector('input[name="isTainanResident"]:checked');
+    surveyData.basic.isTainanResident = residentEl ? residentEl.value : '';
 
     const checkedBoxes = document.querySelectorAll('input[name="visited_district"]:checked');
     surveyData.selectedDistricts = Array.from(checkedBoxes).map(cb => cb.value);
     selectedDistricts = surveyData.selectedDistricts;
+
+    const roleEl = document.querySelector('input[name="role"]:checked');
+    surveyData.basic.role = roleEl ? roleEl.value : '';
 
     persist();
   }
@@ -613,19 +625,23 @@
             const g = document.querySelector(`input[name="gender"][value="${surveyData.basic.gender}"]`);
             if (g) g.checked = true;
           }
-          if (surveyData.basic.role) {
-            const r = document.querySelector(`input[name="role"][value="${surveyData.basic.role}"]`);
-            if (r) r.checked = true;
-          }
           if (surveyData.basic.age !== undefined && surveyData.basic.age !== '') {
             const ageInput = document.getElementById('ageInput');
             if (ageInput) ageInput.value = surveyData.basic.age;
+          }
+          if (surveyData.basic.isTainanResident) {
+            const res = document.querySelector(`input[name="isTainanResident"][value="${surveyData.basic.isTainanResident}"]`);
+            if (res) res.checked = true;
           }
           if (selectedDistricts.length > 0) {
             selectedDistricts.forEach(d => {
               const cb = document.querySelector(`input[name="visited_district"][value="${d}"]`);
               if (cb) cb.checked = true;
             });
+          }
+          if (surveyData.basic.role) {
+            const r = document.querySelector(`input[name="role"][value="${surveyData.basic.role}"]`);
+            if (r) r.checked = true;
           }
 
           // 還原摘要頁
@@ -666,12 +682,16 @@
       document.getElementById('ageInput').focus();
       return;
     }
+    if (!surveyData.basic.isTainanResident) {
+      alert("請勾選您目前是否居住於臺南市（是／否）。");
+      return;
+    }
     if (selectedDistricts.length === 0) {
       alert("請至少勾選一個過去一年內造訪過的街區！");
       return;
     }
     if (!surveyData.basic.role) {
-      alert("請選擇您到訪的身分（居民、訪客或商家）。");
+      alert("請選擇您到訪赤崁周邊歷史街區的身分（居民、訪客或商家）。");
       return;
     }
 
